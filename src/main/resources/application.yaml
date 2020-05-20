@@ -1,0 +1,5 @@
+client:
+  book:
+    rootUrl: http://localhost:8080
+    connectionTimeout: 3000ms
+    socketTimeout: 3000ms

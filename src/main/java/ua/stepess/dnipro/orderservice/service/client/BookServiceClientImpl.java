@@ -1,4 +1,4 @@
-package ua.stepess.dnipro.orderservice.service;
+package ua.stepess.dnipro.orderservice.service.client;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.client.RestTemplateBuilder;
@@ -17,7 +17,7 @@ public class BookServiceClientImpl implements BookServiceClient {
 
     public BookServiceClientImpl(RestTemplateBuilder restTemplateBuilder, BookServiceClientProperties properties) {
         this.restTemplate = restTemplateBuilder
-                .rootUri(properties.getBaseUrl())
+                .rootUri(properties.getRootUrl())
                 .setReadTimeout(properties.getSocketTimeout())
                 .setConnectTimeout(properties.getConnectionTimeout())
                 .build();
