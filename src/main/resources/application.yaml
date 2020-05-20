@@ -1,3 +1,22 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/order_db
+    username: postgres
+    password: postgres123
+
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      show-sql: true
+      ddl-auto: update
+
+hibernate:
+  types:
+    print:
+      banner: false
+
 client:
   book:
     rootUrl: http://localhost:8080
