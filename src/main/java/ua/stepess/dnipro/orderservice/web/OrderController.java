@@ -5,37 +5,35 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 import ua.stepess.dnipro.orderservice.persistence.entity.Order;
-import ua.stepess.dnipro.orderservice.persistence.repository.OrderRepository;
+import ua.stepess.dnipro.orderservice.service.OrderService;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/orders")
 public class OrderController {
 
     @Autowired
-    private OrderRepository repository;
+    private OrderService orderService;
 
     @GetMapping
     public Page<Order> getAllOrders(Pageable pageable) {
-        return null;
+        return orderService.findAll(pageable);
     }
 
     @GetMapping("/{orderId}")
-    public Order getById(@PathVariable String orderId) {
-        return null;
+    public Order getById(@PathVariable UUID orderId) {
+        return orderService.findById(orderId);
     }
 
     @GetMapping(params = "userId")
-    public List<Order> getByUserId(@RequestParam String userId, Pageable pageable) {
-        return null;
+    public Page<Order> getByUserId(@RequestParam String userId, Pageable pageable) {
+        return orderService.findByUserId(userId, pageable);
     }
 
     @PostMapping
     public Order save(@RequestBody Order order) {
-        order.setPlacedAt(LocalDateTime.now());
-        return repository.save(order);
+        return orderService.add(order);
     }
 
 }
