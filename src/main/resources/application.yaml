@@ -12,6 +12,11 @@ spring:
       show-sql: true
       ddl-auto: update
 
+hibernate:
+  types:
+    print:
+      banner: false
+
 client:
   book:
     rootUrl: http://localhost:8080
