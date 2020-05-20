@@ -1,0 +1,13 @@
+@namespace("ua.stepess.dnipro.orderservice.generated.avro")
+protocol Messaging {
+  record OrderEntry {
+    long itemId;
+    int number;
+  }
+
+  record Order {
+    long userId;
+    long cartId;
+    array<OrderEntry> entries;
+  }
+}
