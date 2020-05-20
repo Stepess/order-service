@@ -3,3 +3,7 @@ client:
     rootUrl: http://localhost:8080
     connectionTimeout: 3000ms
     socketTimeout: 3000ms
+  user:
+    rootUrl: http://localhost:8080
+    connectionTimeout: 3000ms
+    socketTimeout: 3000ms
