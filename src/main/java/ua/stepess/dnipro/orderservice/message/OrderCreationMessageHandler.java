@@ -26,8 +26,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderCreationMessageHandler implements MessageHandler {
 
-    private final OrderService orderService;
     private final ObjectMapper mapper;
+    private final OrderService orderService;
 
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
@@ -42,13 +42,19 @@ public class OrderCreationMessageHandler implements MessageHandler {
             orderService.process(orderEntity);
         } catch (Exception ex) {
             log.error("Failed to precess message");
+            toBasicAcknowledgeablePubsubMessage(message)
+                    .ifPresent(BasicAcknowledgeablePubsubMessage::nack);
             throw new OrderCreationMessageProcessingFailed("Message failed", ex);
         }
 
-        Optional.of(message.getHeaders())
-                .map(headers -> headers.get(GcpPubSubHeaders.ORIGINAL_MESSAGE,
-                        BasicAcknowledgeablePubsubMessage.class))
+        toBasicAcknowledgeablePubsubMessage(message)
                 .ifPresent(BasicAcknowledgeablePubsubMessage::ack);
+    }
+
+    private Optional<BasicAcknowledgeablePubsubMessage> toBasicAcknowledgeablePubsubMessage(Message<?> message) {
+        return Optional.of(message.getHeaders())
+                .map(headers -> headers.get(GcpPubSubHeaders.ORIGINAL_MESSAGE,
+                        BasicAcknowledgeablePubsubMessage.class));
     }
 
     private OrderEntity mapOrderDtoToEntity(Order orderDto) {
