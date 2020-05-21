@@ -1,17 +1,23 @@
 package ua.stepess.dnipro.orderservice.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import ua.stepess.dnipro.orderservice.exception.NotEnoughItemsInStockException;
 import ua.stepess.dnipro.orderservice.persistence.entity.OrderEntity;
+import ua.stepess.dnipro.orderservice.persistence.entity.OrderItem;
+import ua.stepess.dnipro.orderservice.persistence.entity.OrderStatus;
 import ua.stepess.dnipro.orderservice.persistence.repository.OrderRepository;
 import ua.stepess.dnipro.orderservice.service.client.BookServiceClient;
 import ua.stepess.dnipro.orderservice.service.client.UserServiceClient;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.function.Consumer;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -41,5 +47,32 @@ public class OrderServiceImpl implements OrderService {
     public OrderEntity add(OrderEntity order) {
         order.setPlacedAt(LocalDateTime.now());
         return orderRepository.save(order);
+    }
+
+    @Override
+    public void process(OrderEntity orderEntity) {
+        var userId = orderEntity.getUserId();
+
+        var user = userServiceClient.getUserById(userId);
+
+        orderEntity.setAddressLine(user.getAddress());
+
+        orderEntity.getOrderDetails()
+                .getOrderItems()
+                .forEach(this::checkItemAvailabilityInStock);
+
+        orderEntity.setPlacedAt(LocalDateTime.now());
+        orderEntity.setStatus(OrderStatus.VERIFIED);
+
+        add(orderEntity);
+    }
+
+    private void checkItemAvailabilityInStock(OrderItem orderItem) {
+        var itemFromStock = bookServiceClient.getItemById(orderItem.getItemId());
+        if (itemFromStock.getQuantity() < orderItem.getQuantity()) {
+            log.warn("Can't perform order placing: requested [{}], available [{}]",
+                    orderItem.getQuantity(), itemFromStock.getQuantity());
+            throw new NotEnoughItemsInStockException();
+        }
     }
 }

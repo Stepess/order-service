@@ -16,4 +16,6 @@ public interface OrderService {
 
     OrderEntity add(OrderEntity order);
 
+    void process(OrderEntity orderEntity);
+
 }
