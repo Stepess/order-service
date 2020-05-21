@@ -38,8 +38,8 @@ public class PubSubConfig {
 
     @Bean
     @ServiceActivator(inputChannel = "pubsubInputChannel")
-    public MessageHandler orderCreationMessageHandler(OrderService orderService, ObjectMapper mapper) {
-        return new OrderCreationMessageHandler(orderService, mapper);
+    public MessageHandler orderCreationMessageHandler(ObjectMapper mapper, OrderService orderService) {
+        return new OrderCreationMessageHandler(mapper, orderService);
     }
 
 }
