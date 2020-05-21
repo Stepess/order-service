@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ua.stepess.dnipro.orderservice.persistence.entity.Order;
+import ua.stepess.dnipro.orderservice.persistence.entity.OrderEntity;
 import ua.stepess.dnipro.orderservice.persistence.repository.OrderRepository;
 import ua.stepess.dnipro.orderservice.service.client.BookServiceClient;
 import ua.stepess.dnipro.orderservice.service.client.UserServiceClient;
@@ -22,23 +22,23 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
 
     @Override
-    public Order findById(UUID id) {
+    public OrderEntity findById(UUID id) {
         return orderRepository.findById(id)
                 .orElseThrow();
     }
 
     @Override
-    public Page<Order> findAll(Pageable pageable) {
+    public Page<OrderEntity> findAll(Pageable pageable) {
         return orderRepository.findAll(pageable);
     }
 
     @Override
-    public Page<Order> findByUserId(String userId, Pageable pageable) {
+    public Page<OrderEntity> findByUserId(String userId, Pageable pageable) {
         return orderRepository.findByUserId(userId, pageable);
     }
 
     @Override
-    public Order add(Order order) {
+    public OrderEntity add(OrderEntity order) {
         order.setPlacedAt(LocalDateTime.now());
         return orderRepository.save(order);
     }
