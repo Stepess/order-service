@@ -1,4 +1,4 @@
-package ua.stepess.dnipro.orderservice.service;
+package ua.stepess.dnipro.orderservice.message;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,11 +6,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
 import org.springframework.cloud.gcp.pubsub.support.GcpPubSubHeaders;
-import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
-import org.springframework.stereotype.Service;
 import ua.stepess.dnipro.orderservice.exception.OrderCreationMessageProcessingFailed;
 import ua.stepess.dnipro.orderservice.generated.avro.Order;
 import ua.stepess.dnipro.orderservice.generated.avro.OrderEntry;
@@ -18,13 +16,13 @@ import ua.stepess.dnipro.orderservice.persistence.entity.OrderDetails;
 import ua.stepess.dnipro.orderservice.persistence.entity.OrderEntity;
 import ua.stepess.dnipro.orderservice.persistence.entity.OrderItem;
 import ua.stepess.dnipro.orderservice.persistence.entity.OrderStatus;
+import ua.stepess.dnipro.orderservice.service.OrderService;
 
 import java.io.UncheckedIOException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
 @RequiredArgsConstructor
 public class OrderCreationMessageHandler implements MessageHandler {
 
@@ -32,7 +30,6 @@ public class OrderCreationMessageHandler implements MessageHandler {
     private final ObjectMapper mapper;
 
     @Override
-    @ServiceActivator(inputChannel = "pubsubInputChannel")
     public void handleMessage(Message<?> message) throws MessagingException {
         var payload = new String((byte[]) message.getPayload());
         log.info("Received order creation event: [{}]", payload);
