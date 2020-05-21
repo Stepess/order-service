@@ -30,8 +30,8 @@ dependencies {
 
 	// data
 	runtimeOnly 'org.postgresql:postgresql'
-	compile group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
-	compile group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.9.10'
+	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+	implementation group: 'com.vladmihalcea', name: 'hibernate-types-52', version: '2.9.10'
 
 	// test
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -41,4 +41,8 @@ dependencies {
 
 test {
 	useJUnitPlatform()
+}
+
+bootBuildImage {
+	imageName = "order-service:v0.0.1"
 }
