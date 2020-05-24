@@ -4,8 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-import ua.stepess.dnipro.orderservice.persistence.entity.Order;
 import ua.stepess.dnipro.orderservice.service.OrderService;
+import ua.stepess.dnipro.orderservice.persistence.entity.OrderEntity;
 
 import java.util.UUID;
 
@@ -17,22 +17,22 @@ public class OrderController {
     private OrderService orderService;
 
     @GetMapping
-    public Page<Order> getAllOrders(Pageable pageable) {
+    public Page<OrderEntity> getAllOrders(Pageable pageable) {
         return orderService.findAll(pageable);
     }
 
     @GetMapping("/{orderId}")
-    public Order getById(@PathVariable UUID orderId) {
+    public OrderEntity getById(@PathVariable UUID orderId) {
         return orderService.findById(orderId);
     }
 
     @GetMapping(params = "userId")
-    public Page<Order> getByUserId(@RequestParam String userId, Pageable pageable) {
+    public Page<OrderEntity> getByUserId(@RequestParam String userId, Pageable pageable) {
         return orderService.findByUserId(userId, pageable);
     }
 
     @PostMapping
-    public Order save(@RequestBody Order order) {
+    public OrderEntity save(@RequestBody OrderEntity order) {
         return orderService.add(order);
     }
 

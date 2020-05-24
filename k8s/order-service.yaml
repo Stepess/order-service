@@ -32,10 +32,16 @@ spec:
             secretName: sa-creds
       containers:
         - name: order-service
-          image: gcr.io/dnipro-store/order-service:0.0.1
+          image: gcr.io/dnipro-store/order-service:0.0.3
           ports:
             - containerPort: 8080
+          volumeMounts:
+            - name: sa-key-volume
+              mountPath: /var/secrets/google
+              readOnly: true
           env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /var/secrets/google/service_account.json
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: DB_USER_NAME

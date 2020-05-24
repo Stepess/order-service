@@ -1,7 +1,12 @@
+import org.betterplugin.avro.GenerateAvroJavaTask
+import org.betterplugin.avro.GenerateAvroProtocolTask
+import org.betterplugin.avro.GenerateAvroSchemaTask
+
 plugins {
 	id 'org.springframework.boot' version '2.3.0.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
+	id 'org.betterplugin.avro' version '0.19.2-SNAPSHOT'
 }
 
 group = 'ua.stepess.dnipro'
@@ -20,9 +25,16 @@ repositories {
 
 dependencies {
 	// spring
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-gcp-starter-pubsub', version: '1.2.2.RELEASE'
+	implementation group: 'org.springframework.integration', name: 'spring-integration-core'
+	implementation group: 'org.springframework.cloud', name: 'spring-cloud-gcp-dependencies', version: '1.2.2.RELEASE', ext: 'pom'
+
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// avro
+	implementation 'org.apache.avro:avro:1.9.2'
 
 	// lombok
 	compileOnly 'org.projectlombok:lombok'
@@ -43,6 +55,38 @@ test {
 	useJUnitPlatform()
 }
 
-bootBuildImage {
-	imageName = "order-service:v0.0.1"
+// avro config
+
+avro {
+	fieldVisibility = "PRIVATE"
+	outputCharacterEncoding = "UTF-8"
+	stringType = "String"
+	dateTimeLogicalType = "JSR310"
+}
+
+
+def generateProtocol = tasks.register("generateProtocol", GenerateAvroProtocolTask) {
+	delete("./build/generated-avro-main-avpr")
+	source file("./src/main/resources/avro")
+	include("**/*.avdl")
+	outputDir = file("./build/generated-avro-main-avpr")
+}
+
+def generateSchema = tasks.register("generateSchema", GenerateAvroSchemaTask) {
+	delete("./build/generated-main-avro-avsc")
+	dependsOn generateProtocol
+	source file("./build/generated-avro-main-avpr")
+	include("**/*.avpr")
+	outputDir = file("./build/generated-main-avro-avsc")
+}
+
+def generateAvro = tasks.register("generateAvro", GenerateAvroJavaTask) {
+	delete("./src/main/java/dev/flanker/cart/generated/avro")
+	dependsOn generateSchema
+	source("./build/generated-main-avro-avsc")
+	outputDir = file("./src/main/java/")
+}
+
+tasks.named("compileJava").configure {
+	source(generateAvro)
 }

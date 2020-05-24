@@ -16,7 +16,7 @@ import java.util.UUID;
 @TypeDefs({
         @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
 })
-public class Order {
+public class OrderEntity {
     @Id
     @Type(type = "pg-uuid")
     @GeneratedValue
