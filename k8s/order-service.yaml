@@ -26,7 +26,10 @@ spec:
       labels:
         app: order-service
     spec:
-      serviceAccountName: order-service-ksa
+      volumes:
+        - name: sa-key-volume
+          secret:
+            secretName: sa-creds
       containers:
         - name: order-service
           image: gcr.io/dnipro-store/order-service:0.0.1
@@ -49,8 +52,13 @@ spec:
           image: gcr.io/cloudsql-docker/gce-proxy:1.17
           command:
             - "/cloud_sql_proxy"
-            - "-instances=dnipro-store:us-central1:dnipro-sql=tcp:5432"
+            - "-instances=dnipro-store:us-central1:dnipro-psql-0=tcp:5432"
+            - "-credential_file=/secrets/service_account.json"
           securityContext:
             runAsNonRoot: true
             runAsUser: 65532
             allowPrivilegeEscalation: false
+          volumeMounts:
+            - name: sa-key-volume
+              mountPath: /secrets/
+              readOnly: true
