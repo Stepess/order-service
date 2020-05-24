@@ -2,6 +2,7 @@ package ua.stepess.dnipro.orderservice.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gcp.pubsub.core.PubSubTemplate;
 import org.springframework.cloud.gcp.pubsub.integration.AckMode;
 import org.springframework.cloud.gcp.pubsub.integration.inbound.PubSubInboundChannelAdapter;
@@ -19,12 +20,18 @@ import ua.stepess.dnipro.orderservice.service.OrderService;
 @Profile("k8s")
 public class PubSubConfig {
 
+    private final String subscriptionName;
+
+    public PubSubConfig(@Value("${messaging.gcp.subscription-name}") String subscriptionName) {
+        this.subscriptionName = subscriptionName;
+    }
+
     @Bean
     public PubSubInboundChannelAdapter messageChannelAdapter(
             @Qualifier("pubsubInputChannel") MessageChannel inputChannel,
             PubSubTemplate pubSubTemplate) {
         PubSubInboundChannelAdapter adapter =
-                new PubSubInboundChannelAdapter(pubSubTemplate, "placedOrdersSubscription");
+                new PubSubInboundChannelAdapter(pubSubTemplate, subscriptionName);
         adapter.setOutputChannel(inputChannel);
         adapter.setAckMode(AckMode.MANUAL);
 
