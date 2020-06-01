@@ -15,7 +15,6 @@ import ua.stepess.dnipro.orderservice.service.client.UserServiceClient;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 @Slf4j
 @Service
@@ -50,7 +49,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public void process(OrderEntity orderEntity) {
+    public OrderEntity process(OrderEntity orderEntity) {
         var userId = orderEntity.getUserId();
 
         var user = userServiceClient.getUserById(userId);
@@ -64,7 +63,7 @@ public class OrderServiceImpl implements OrderService {
         orderEntity.setPlacedAt(LocalDateTime.now());
         orderEntity.setStatus(OrderStatus.VERIFIED);
 
-        add(orderEntity);
+        return add(orderEntity);
     }
 
     private void checkItemAvailabilityInStock(OrderItem orderItem) {

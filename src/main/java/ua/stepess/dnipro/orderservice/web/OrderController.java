@@ -33,7 +33,7 @@ public class OrderController {
 
     @PostMapping
     public OrderEntity save(@RequestBody OrderEntity order) {
-        return orderService.add(order);
+        return orderService.process(order);
     }
 
 }

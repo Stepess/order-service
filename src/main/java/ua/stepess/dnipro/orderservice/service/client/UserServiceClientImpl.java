@@ -8,7 +8,7 @@ import ua.stepess.dnipro.orderservice.dto.user.User;
 @Service
 public class UserServiceClientImpl extends AbstractBaseRestClient implements UserServiceClient {
 
-    private static final String USER_API_PATH = "/api/v1/users?ID={id}";
+    private static final String USER_API_PATH = "/api/v3/users/{id}";
 
     public UserServiceClientImpl(RestTemplateBuilder restTemplateBuilder, UserServiceClientProperties properties) {
         super(restTemplateBuilder, properties);
