@@ -4,6 +4,21 @@ spring:
     username: ${DB_USER_NAME}
     password: ${DB_PASSWORD}
 
+  cloud:
+    gcp:
+      pubsub:
+        project-id: big-data-lab-2903
+
 messaging:
   gcp:
-    subscription-name: orders-subscription
+    subscription-name: orders-microservice-subscription
+
+client:
+  book:
+    rootUrl: http://book-service
+    connectionTimeout: 3000ms
+    socketTimeout: 3000ms
+  user:
+    rootUrl: http://user-service
+    connectionTimeout: 3000ms
+    socketTimeout: 3000ms

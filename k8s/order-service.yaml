@@ -27,21 +27,24 @@ spec:
         app: order-service
     spec:
       volumes:
-        - name: sa-key-volume
+        - name: sa-sql-volume
           secret:
-            secretName: sa-creds
+            secretName: sql-creds
+        - name: sa-pubsub-volume
+          secret:
+            secretName: pubsub-creds
       containers:
         - name: order-service
-          image: gcr.io/dnipro-store/order-service:0.0.3
+          image: gcr.io/dnipro-store/order-service:0.0.6
           ports:
             - containerPort: 8080
           volumeMounts:
-            - name: sa-key-volume
+            - name: sa-pubsub-volume
               mountPath: /var/secrets/google
               readOnly: true
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: /var/secrets/google/service_account.json
+              value: /var/secrets/google/pubsub_service_account.json
             - name: SPRING_PROFILES_ACTIVE
               value: k8s
             - name: DB_USER_NAME
@@ -59,12 +62,12 @@ spec:
           command:
             - "/cloud_sql_proxy"
             - "-instances=dnipro-store:us-central1:dnipro-psql-0=tcp:5432"
-            - "-credential_file=/secrets/service_account.json"
+            - "-credential_file=/secrets/sql_service_account.json"
           securityContext:
             runAsNonRoot: true
             runAsUser: 65532
             allowPrivilegeEscalation: false
           volumeMounts:
-            - name: sa-key-volume
+            - name: sa-sql-volume
               mountPath: /secrets/
               readOnly: true

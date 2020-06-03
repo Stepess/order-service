@@ -1,7 +1,7 @@
 package ua.stepess.dnipro.orderservice.message;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.flanker.cart.generated.avro.Order;
+import dev.flanker.cart.generated.avro.OrderEntry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gcp.pubsub.support.BasicAcknowledgeablePubsubMessage;
@@ -10,15 +10,15 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import ua.stepess.dnipro.orderservice.exception.OrderCreationMessageProcessingFailed;
-import ua.stepess.dnipro.orderservice.generated.avro.Order;
-import ua.stepess.dnipro.orderservice.generated.avro.OrderEntry;
 import ua.stepess.dnipro.orderservice.persistence.entity.OrderDetails;
 import ua.stepess.dnipro.orderservice.persistence.entity.OrderEntity;
 import ua.stepess.dnipro.orderservice.persistence.entity.OrderItem;
 import ua.stepess.dnipro.orderservice.persistence.entity.OrderStatus;
 import ua.stepess.dnipro.orderservice.service.OrderService;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.nio.ByteBuffer;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -26,13 +26,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class OrderCreationMessageHandler implements MessageHandler {
 
-    private final ObjectMapper mapper;
     private final OrderService orderService;
 
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
-        var payload = new String((byte[]) message.getPayload());
-        log.info("Received order creation event: [{}]", payload);
+        var payload = (byte[]) message.getPayload();
+        log.info("Received order creation event: [{}]", message);
 
         try {
             var orderDto = parsePayload(payload);
@@ -41,7 +40,7 @@ public class OrderCreationMessageHandler implements MessageHandler {
 
             orderService.process(orderEntity);
         } catch (Exception ex) {
-            log.error("Failed to precess message");
+            log.error("Failed to precess message", ex);
             toBasicAcknowledgeablePubsubMessage(message)
                     .ifPresent(BasicAcknowledgeablePubsubMessage::nack);
             throw new OrderCreationMessageProcessingFailed("Message failed", ex);
@@ -77,15 +76,16 @@ public class OrderCreationMessageHandler implements MessageHandler {
 
     private OrderItem mapOrderEntryToOrderItem(OrderEntry entry) {
         var orderItem = new OrderItem();
-        orderItem.setItemId(String.valueOf(entry.getItemId()));
+        orderItem.setItemId(entry.getItemId());
         orderItem.setQuantity((long) entry.getNumber());
         return orderItem;
     }
 
-    private Order parsePayload(String payload) {
+    private Order parsePayload(byte[] payload) {
         try {
-            return mapper.readValue(payload, Order.class);
-        } catch (JsonProcessingException e) {
+            return Order.fromByteBuffer(
+                    ByteBuffer.wrap(payload));
+        } catch (IOException e) {
             throw new UncheckedIOException("Failed to read message", e);
         }
     }
