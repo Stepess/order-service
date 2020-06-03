@@ -31,10 +31,12 @@ public class OrderCreationMessageHandler implements MessageHandler {
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
         var payload = (byte[]) message.getPayload();
-        log.info("Received order creation event: [{}]", message);
+        log.info("Received order creation event: message id [{}]", message.getHeaders().getId());
 
         try {
             var orderDto = parsePayload(payload);
+
+            log.info("Parsed order DTO: [{}]", orderDto);
 
             var orderEntity = mapOrderDtoToEntity(orderDto);
 
@@ -43,9 +45,10 @@ public class OrderCreationMessageHandler implements MessageHandler {
             log.error("Failed to precess message", ex);
             toBasicAcknowledgeablePubsubMessage(message)
                     .ifPresent(BasicAcknowledgeablePubsubMessage::nack);
-            throw new OrderCreationMessageProcessingFailed("Message failed", ex);
+            throw new OrderCreationMessageProcessingFailed("Message processing failed", ex);
         }
 
+        log.info("Message processed: message id [{}]", message.getHeaders().getId());
         toBasicAcknowledgeablePubsubMessage(message)
                 .ifPresent(BasicAcknowledgeablePubsubMessage::ack);
     }

@@ -35,7 +35,7 @@ spec:
             secretName: pubsub-creds
       containers:
         - name: order-service
-          image: gcr.io/dnipro-store/order-service:0.0.6
+          image: gcr.io/dnipro-store/order-service:0.0.7
           ports:
             - containerPort: 8080
           volumeMounts:
