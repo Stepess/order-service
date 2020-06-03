@@ -28,28 +28,33 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderEntity findById(UUID id) {
+        log.info("Retrieving order by id [{}]", id);
         return orderRepository.findById(id)
                 .orElseThrow();
     }
 
     @Override
     public Page<OrderEntity> findAll(Pageable pageable) {
+        log.info("Retrieving all orders");
         return orderRepository.findAll(pageable);
     }
 
     @Override
     public Page<OrderEntity> findByUserId(String userId, Pageable pageable) {
+        log.info("Retrieving order by user id [{}]", userId);
         return orderRepository.findByUserId(userId, pageable);
     }
 
     @Override
     public OrderEntity add(OrderEntity order) {
         order.setPlacedAt(LocalDateTime.now());
+        log.info("Saving order: [{}]", order);
         return orderRepository.save(order);
     }
 
     @Override
     public OrderEntity process(OrderEntity orderEntity) {
+        log.info("Processing order entity: [{}]", orderEntity);
         var userId = orderEntity.getUserId();
 
         var user = userServiceClient.getUserById(userId);
@@ -58,11 +63,12 @@ public class OrderServiceImpl implements OrderService {
 
         orderEntity.getOrderDetails()
                 .getOrderItems()
+                .parallelStream()
                 .forEach(this::checkItemAvailabilityInStock);
 
-        orderEntity.setPlacedAt(LocalDateTime.now());
         orderEntity.setStatus(OrderStatus.VERIFIED);
 
+        log.info("Order for user id [{}] processed successfully", orderEntity.getUserId());
         return add(orderEntity);
     }
 
